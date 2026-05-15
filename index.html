@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Mission Brief — USS Intrepid, 19 May 2026</title>
+<title>SBC III Intrepid Field Trip</title>
 <style>
   :root {
     --paper:      #f3eacd;
@@ -265,6 +265,8 @@
     cursor: pointer;
   }
   .filter-btn[aria-pressed="true"] { background: var(--navy); color: #f4e5b8; border-color: var(--navy); }
+  #filterWarn[aria-pressed="true"]     { background: var(--brass);     border-color: var(--brass);     color: #fff7d8; }
+  #filterGrounded[aria-pressed="true"] { background: var(--stamp-red); border-color: var(--stamp-red); color: #fbeede; }
 
   #briefs {
     display: flex;
@@ -598,7 +600,7 @@
 
   <header class="masthead">
     <div class="hull stencil">Hull CV-11 &middot; Later CVA-11 / CVS-11 &middot; "The Fighting I"</div>
-    <h1 class="brief-title">Mission Brief</h1>
+    <h1 class="brief-title">SBC III Intrepid Field Trip</h1>
     <div class="ship">
       <span class="amp">U.S.S.</span> Intrepid &mdash; Sea, Air <span class="amp">&amp;</span> Space Museum
     </div>
@@ -655,6 +657,7 @@
     <span class="label">Crew Roster</span>
     <input type="search" id="search" placeholder="Search crew by name..." autocomplete="off" />
     <button class="filter-btn" id="filterAll" aria-pressed="true">All</button>
+    <button class="filter-btn" id="filterWarn" aria-pressed="false">Close Watch only</button>
     <button class="filter-btn" id="filterGrounded" aria-pressed="false">Grounded only</button>
     <span class="stat" id="stat"></span>
   </div>
@@ -1032,29 +1035,35 @@ function rosterRow(s, t, chipClass) {
   return '<li><b>' + s.name + '</b>' + dates + '</li>';
 }
 
-var groundedOnly = false;
+var FILTER_BUTTONS = { all: "filterAll", warn: "filterWarn", grounded: "filterGrounded" };
+var filterMode = "all";
+
 function applyFilter() {
   var q = document.getElementById("search").value.toLowerCase().trim();
   var cards = document.querySelectorAll(".brief");
   cards.forEach(function (c) {
     var nameMatch = !q || c.dataset.name.indexOf(q) !== -1;
-    var statusMatch = !groundedOnly || c.dataset.cleared === "0";
+    var statusMatch =
+      filterMode === "all" ||
+      (filterMode === "grounded" && c.dataset.cleared === "0") ||
+      (filterMode === "warn"     && c.dataset.warn === "1");
     c.classList.toggle("hidden", !(nameMatch && statusMatch));
   });
 }
 
+function setFilterMode(mode) {
+  filterMode = mode;
+  Object.keys(FILTER_BUTTONS).forEach(function (m) {
+    var btn = document.getElementById(FILTER_BUTTONS[m]);
+    if (btn) btn.setAttribute("aria-pressed", m === mode ? "true" : "false");
+  });
+  applyFilter();
+}
+
 document.getElementById("search").addEventListener("input", applyFilter);
-document.getElementById("filterAll").addEventListener("click", function () {
-  groundedOnly = false;
-  document.getElementById("filterAll").setAttribute("aria-pressed", "true");
-  document.getElementById("filterGrounded").setAttribute("aria-pressed", "false");
-  applyFilter();
-});
-document.getElementById("filterGrounded").addEventListener("click", function () {
-  groundedOnly = true;
-  document.getElementById("filterAll").setAttribute("aria-pressed", "false");
-  document.getElementById("filterGrounded").setAttribute("aria-pressed", "true");
-  applyFilter();
+Object.keys(FILTER_BUTTONS).forEach(function (mode) {
+  var btn = document.getElementById(FILTER_BUTTONS[mode]);
+  if (btn) btn.addEventListener("click", function () { setFilterMode(mode); });
 });
 
 document.getElementById("saveBtn").addEventListener("click", save);
