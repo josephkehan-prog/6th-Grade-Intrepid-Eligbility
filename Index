@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Mission Brief — USS Intrepid, 19 May 2026</title>
+<style>
+  :root {
+    --paper:      #f3eacd;
+    --paper-soft: #ebe1bf;
+    --paper-deep: #ddcd9d;
+    --ink:        #11212d;
+    --ink-soft:   #2e3d4d;
+    --muted:      #5e6a78;
+    --rule:       #19293a;
+    --brass:      #a47b2a;
+    --brass-deep: #7a5a14;
+    --navy:       #0d2138;
+    --navy-soft:  #1a3554;
+    --stamp-red:  #8a1c1c;
+    --stamp-grn:  #25542a;
+    --miss:       #e8c79e;
+  }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background:
+      repeating-linear-gradient(
+        180deg,
+        transparent 0,
+        transparent 28px,
+        rgba(13, 33, 56, .04) 28px,
+        rgba(13, 33, 56, .04) 29px
+      ),
+      radial-gradient(1200px 600px at 20% -10%, #efe5c5 0%, transparent 60%),
+      radial-gradient(900px 500px at 110% 10%, #e0d3a8 0%, transparent 55%),
+      var(--paper);
+    color: var(--ink);
+    font-family: "Iowan Old Style", "Hoefler Text", "Georgia", "Times New Roman", serif;
+    font-size: 15px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    padding: 36px 28px 80px;
+    min-height: 100vh;
+  }
+  .sheet {
+    max-width: 1100px;
+    margin: 0 auto;
+    background: var(--paper-soft);
+    border: 1px solid var(--rule);
+    box-shadow:
+      0 0 0 6px var(--paper) inset,
+      0 18px 40px -22px rgba(13, 33, 56, .35);
+    padding: 38px 44px 44px;
+    position: relative;
+  }
+  .sheet::before, .sheet::after {
+    content: "";
+    position: absolute;
+    left: 18px; right: 18px;
+    height: 3px;
+    background: var(--rule);
+  }
+  .sheet::before { top: 14px; box-shadow: 0 4px 0 var(--rule); }
+  .sheet::after  { bottom: 14px; box-shadow: 0 -4px 0 var(--rule); }
+
+  .stencil {
+    font-family: "Stardos Stencil", "Special Elite", "Oswald", "Arial Narrow", "Helvetica Neue", sans-serif;
+    text-transform: uppercase;
+    letter-spacing: .14em;
+    font-weight: 700;
+  }
+
+  header.masthead {
+    text-align: center;
+    padding-bottom: 18px;
+    border-bottom: 2px solid var(--rule);
+    margin-bottom: 24px;
+  }
+  header.masthead::after {
+    content: "";
+    display: block;
+    margin: 6px auto 0;
+    width: 86%;
+    border-top: 1px solid var(--rule);
+  }
+  .hull {
+    font-size: 11px;
+    color: var(--brass-deep);
+    letter-spacing: .32em;
+  }
+  h1.brief-title {
+    font-family: "Stardos Stencil", "Oswald", sans-serif;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    font-weight: 700;
+    font-size: 44px;
+    margin: 6px 0 4px;
+    line-height: 1;
+    color: var(--navy);
+    text-shadow: 0 1px 0 rgba(255,255,255,.4);
+  }
+  .ship {
+    font-family: "Iowan Old Style", Georgia, serif;
+    font-style: italic;
+    font-size: 18px;
+    color: var(--ink-soft);
+    margin-bottom: 8px;
+  }
+  .ship .amp { color: var(--brass); font-weight: 700; font-style: normal; letter-spacing: .04em; }
+  .meta-row {
+    display: flex;
+    justify-content: center;
+    gap: 28px;
+    flex-wrap: wrap;
+    font-size: 12px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-top: 8px;
+  }
+  .meta-row b { color: var(--ink); letter-spacing: .12em; }
+
+  .block {
+    background: #fffaec;
+    border: 1px solid var(--rule);
+    padding: 16px 20px 14px;
+    margin-bottom: 26px;
+    position: relative;
+  }
+  .block .tag {
+    position: absolute;
+    top: -10px; left: 18px;
+    background: var(--paper-soft);
+    padding: 0 8px;
+    font-size: 11px;
+    color: var(--brass-deep);
+  }
+  .block p { margin: 0; font-size: 14px; color: var(--ink-soft); }
+  .block p + p { margin-top: 8px; }
+  .block b { color: var(--ink); }
+  .crit {
+    display: inline-block;
+    background: var(--navy);
+    color: #f4e5b8;
+    padding: 1px 6px;
+    border-radius: 2px;
+    font-family: "Stardos Stencil", "Oswald", sans-serif;
+    letter-spacing: .12em;
+    font-size: 12px;
+  }
+
+  .logistics {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 16px;
+  }
+  @media (max-width: 700px) { .logistics { grid-template-columns: 1fr; } }
+  .logistics .panel {
+    border: 1px dashed var(--rule);
+    padding: 12px 14px;
+    background: #fffdf3;
+  }
+  .logistics h3 {
+    font-family: "Stardos Stencil", "Oswald", sans-serif;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    font-size: 12px;
+    margin: 0 0 6px;
+    color: var(--brass-deep);
+  }
+  .logistics .addr {
+    font-family: "Iowan Old Style", Georgia, serif;
+    font-size: 15px;
+    color: var(--ink);
+    line-height: 1.45;
+  }
+  .logistics .addr b { color: var(--navy); }
+  .logistics dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; font-size: 13px; }
+  .logistics dt { color: var(--brass-deep); text-transform: uppercase; letter-spacing: .12em; font-size: 10.5px; font-weight: 700; align-self: center; }
+  .logistics dd { margin: 0; color: var(--ink); }
+
+  .roster-bar {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    background: #fffaec;
+    border: 1px solid var(--rule);
+    padding: 10px 14px;
+    margin-bottom: 18px;
+  }
+  .roster-bar .label {
+    font-family: "Stardos Stencil", "Oswald", sans-serif;
+    text-transform: uppercase;
+    letter-spacing: .16em;
+    font-size: 11px;
+    color: var(--brass-deep);
+  }
+  .roster-bar input[type="search"] {
+    flex: 1 1 200px;
+    font: inherit;
+    font-size: 14px;
+    border: 1px solid var(--rule);
+    background: #fffdf3;
+    padding: 6px 10px;
+    border-radius: 2px;
+    color: var(--ink);
+  }
+  .roster-bar input[type="search"]:focus { outline: 1px solid var(--brass); }
+  .roster-bar .stat {
+    font-size: 12px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .roster-bar .stat b { color: var(--stamp-grn); }
+  .roster-bar .stat .no { color: var(--stamp-red); }
+  .filter-btn {
+    font: inherit;
+    font-family: "Stardos Stencil", "Oswald", sans-serif;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    font-size: 11px;
+    border: 1px solid var(--rule);
+    background: #fffdf3;
+    color: var(--ink);
+    padding: 6px 10px;
+    cursor: pointer;
+  }
+  .filter-btn[aria-pressed="true"] { background: var(--navy); color: #f4e5b8; border-color: var(--navy); }
+
+  #briefs {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .brief {
+    background: #fffaec;
+    border: 1px solid var(--rule);
+    position: relative;
+    page-break-inside: avoid;
+  }
+  .brief::before {
+    content: "";
+    position: absolute;
+    inset: 3px;
+    border: 1px solid var(--rule);
+    pointer-events: none;
+  }
+  .brief.hidden { display: none; }
+
+  .brief-head {
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid var(--rule);
+    padding: 10px 14px;
+    gap: 12px;
+    background: linear-gradient(180deg, #fff7e0 0%, #fffaec 100%);
+  }
+  .brief-id {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .brief-id .role {
+    font-size: 9.5px;
+    letter-spacing: .26em;
+    color: var(--brass-deep);
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+  .brief-id .name {
+    font-family: "Stardos Stencil", "Oswald", sans-serif;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    font-size: 19px;
+    line-height: 1.05;
+    color: var(--navy);
+    margin-top: 2px;
+    overflow-wrap: anywhere;
+  }
+  .brief-id .file {
+    font-size: 10.5px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  .stamp {
+    flex: 0 0 auto;
+    border: 2px solid currentColor;
+    padding: 6px 10px 4px;
+    font-family: "Stardos Stencil", "Oswald", sans-serif;
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    font-size: 14px;
+    font-weight: 700;
+    transform: rotate(-4deg);
+    border-radius: 3px;
+    text-align: center;
+    line-height: 1.05;
+    background: rgba(255, 250, 236, .6);
+    box-shadow: inset 0 0 0 1px currentColor;
+  }
+  .stamp .sub {
+    display: block;
+    font-size: 9px;
+    letter-spacing: .2em;
+    font-weight: 400;
+    margin-top: 1px;
+    opacity: .85;
+  }
+  .stamp.go { color: var(--stamp-grn); }
+  .stamp.no { color: var(--stamp-red); }
+
+  .brief[data-cleared="0"] {
+    background: #e6e2d6;
+    border-color: #7e8088;
+    opacity: .92;
+  }
+  .brief[data-cleared="0"]::before { border-color: #7e8088; }
+  .brief[data-cleared="0"] .brief-head {
+    background: #ddd9cd;
+    border-bottom-color: #7e8088;
+  }
+  .brief[data-cleared="0"] .brief-id .role,
+  .brief[data-cleared="0"] .brief-id .file { color: #7a7e87; }
+  .brief[data-cleared="0"] .brief-id .name { color: #4f535c; }
+  .brief[data-cleared="0"] .day {
+    background: #ebe7db;
+    border-color: #9a9da3;
+  }
+  .brief[data-cleared="0"] .day.miss { background: #d8c098; }
+  .brief[data-cleared="0"] .day .date { color: #4f535c; }
+  .brief[data-cleared="0"] .day .dow,
+  .brief[data-cleared="0"] .day .lbl { color: #7a7e87; }
+  .brief[data-cleared="0"] .day hr { border-top-color: #9a9da3; }
+  .brief[data-cleared="0"] .day input[type="checkbox"] {
+    border-color: #9a9da3; background: #f1ede2;
+  }
+  .brief[data-cleared="0"] .day input[type="checkbox"]:checked {
+    background: #686b73; border-color: #686b73;
+  }
+  .brief[data-cleared="0"] .day input[type="number"] {
+    border-color: #9a9da3; color: #4f535c; background: #f1ede2;
+  }
+  .brief[data-cleared="0"] .tally {
+    background: #d7d2c3;
+    border-top-color: #7e8088;
+  }
+  .brief[data-cleared="0"] .tally .cell { border-right-color: #9a9da3; }
+  .brief[data-cleared="0"] .tally .lbl { color: #7a7e87; }
+  .brief[data-cleared="0"] .tally .val { color: #4f535c; }
+  .brief[data-cleared="0"] .tally .val.bad { color: var(--stamp-red); }
+  .brief[data-cleared="0"] .tally .threshold { color: #8a8d92; }
+
+  .strip-wrap {
+    padding: 10px 10px 6px;
+    overflow-x: auto;
+  }
+  .strip {
+    display: grid;
+    grid-template-columns: repeat(10, minmax(0, 1fr));
+    gap: 5px;
+  }
+  .day {
+    border: 1px solid var(--rule);
+    background: #fffdf3;
+    padding: 6px 4px 7px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    min-width: 0;
+  }
+  .day.miss { background: var(--miss); }
+  .day .date {
+    font-family: "Stardos Stencil", "Oswald", sans-serif;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    font-size: 12px;
+    color: var(--navy);
+    line-height: 1;
+  }
+  .day .dow {
+    font-size: 9px;
+    letter-spacing: .16em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+  .day hr {
+    width: 100%;
+    border: none;
+    border-top: 1px dashed var(--rule);
+    margin: 2px 0 1px;
+  }
+  .day .lbl {
+    font-size: 8.5px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .day input[type="checkbox"] {
+    -webkit-appearance: none; appearance: none;
+    width: 16px; height: 16px;
+    border: 2px solid var(--rule);
+    background: #fffdf3;
+    border-radius: 2px;
+    margin: 0;
+    cursor: pointer;
+    position: relative;
+  }
+  .day input[type="checkbox"]:checked { background: var(--stamp-grn); border-color: var(--stamp-grn); }
+  .day input[type="checkbox"]:checked::after {
+    content: "";
+    position: absolute;
+    left: 3px; top: -1px;
+    width: 5px; height: 10px;
+    border: solid #fff8da;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+  .day input[type="number"] {
+    width: 34px;
+    text-align: center;
+    border: 1px solid var(--rule);
+    background: #fffdf3;
+    font-family: "Iowan Old Style", Georgia, serif;
+    font-size: 12px;
+    color: var(--ink);
+    padding: 1px 0;
+    border-radius: 2px;
+  }
+  .day input[type="number"]:focus { outline: 1px solid var(--brass); }
+  .day input[type="number"]::-webkit-inner-spin-button,
+  .day input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none; margin: 0;
+  }
+
+  .tally {
+    display: flex;
+    border-top: 1px solid var(--rule);
+    background: #f6ecc8;
+  }
+  .tally .cell {
+    flex: 1 1 0;
+    text-align: center;
+    padding: 8px 6px;
+    border-right: 1px solid var(--rule);
+    min-width: 0;
+  }
+  .tally .cell:last-child { border-right: none; flex: 1.6 1 0; }
+  .tally .lbl {
+    font-size: 9.5px;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: var(--brass-deep);
+    font-weight: 700;
+  }
+  .tally .val {
+    font-family: "Stardos Stencil", "Oswald", sans-serif;
+    font-size: 20px;
+    color: var(--navy);
+    margin-top: 1px;
+    letter-spacing: .04em;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+  .tally .val.bad { color: var(--stamp-red); }
+  .tally .threshold {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+  .tally .reason {
+    font-size: 11.5px;
+    color: var(--stamp-red);
+    margin-top: 2px;
+    font-style: italic;
+    line-height: 1.25;
+  }
+  .tally .reason.ok { color: var(--stamp-grn); font-style: normal; }
+
+  .actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-top: 22px;
+    padding-top: 18px;
+    border-top: 1px solid var(--rule);
+  }
+  .actions button {
+    font: inherit;
+    font-family: "Stardos Stencil", "Oswald", sans-serif;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    font-size: 12px;
+    background: #fffaec;
+    color: var(--ink);
+    border: 1px solid var(--rule);
+    padding: 8px 14px;
+    cursor: pointer;
+  }
+  .actions button:hover { background: var(--paper-deep); }
+  .actions button.primary { background: var(--navy); color: #f4e5b8; border-color: var(--navy); }
+  .actions button.primary:hover { background: #061727; }
+  .actions .right {
+    margin-left: auto;
+    font-size: 11px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  footer.sig {
+    margin-top: 22px;
+    text-align: center;
+    font-size: 11px;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  footer.sig .brass { color: var(--brass-deep); font-weight: 700; }
+
+  @media (max-width: 720px) {
+    .sheet { padding: 24px 16px; }
+    h1.brief-title { font-size: 32px; }
+    .brief-id .name { font-size: 16px; }
+    .strip { grid-template-columns: repeat(5, minmax(56px, 1fr)); }
+  }
+
+  @media print {
+    body { background: #fff; padding: 0; }
+    .sheet { box-shadow: none; border-color: #000; padding: 18px; max-width: none; }
+    .actions, .roster-bar { display: none; }
+    .day input[type="number"] { border: none; }
+    .stamp, .tally .val.bad, .tally .reason, .day.miss {
+      -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    }
+    #briefs { gap: 10px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="sheet">
+
+  <header class="masthead">
+    <div class="hull stencil">Hull CV-11 &middot; Later CVA-11 / CVS-11 &middot; "The Fighting I"</div>
+    <h1 class="brief-title">Mission Brief</h1>
+    <div class="ship">
+      <span class="amp">U.S.S.</span> Intrepid &mdash; Sea, Air <span class="amp">&amp;</span> Space Museum
+    </div>
+    <div class="meta-row">
+      <span><b class="stencil">Embark:</b> Tuesday, 19 May 2026</span>
+      <span><b class="stencil">Window:</b> 5&ndash;18 May (10 school days)</span>
+      <span><b class="stencil">Crew:</b> Grade 6</span>
+    </div>
+  </header>
+
+  <section class="block">
+    <span class="tag stencil">Mission Logistics</span>
+    <div class="logistics">
+      <div class="panel">
+        <h3>Embarkation Point</h3>
+        <div class="addr">
+          <b>Intrepid Sea, Air &amp; Space Museum</b><br/>
+          Pier 86, West 46th Street &amp; 12th Avenue<br/>
+          Hudson River, Manhattan &mdash; New York, NY 10036
+        </div>
+      </div>
+      <div class="panel">
+        <h3>Operations Note</h3>
+        <dl>
+          <dt>Date</dt><dd>Tuesday, 19 May 2026</dd>
+          <dt>Window</dt><dd>Museum hours, 10:00&ndash;17:00</dd>
+          <dt>Aboard</dt><dd>Flight deck, hangar deck, USS <i>Growler</i> submarine, Space Shuttle Pavilion, Concorde</dd>
+          <dt>Dress</dt><dd>School uniform &middot; closed-toe shoes &middot; light jacket (flight deck is open-air)</dd>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <span class="tag stencil">Standing Orders</span>
+    <p>To embark on the <i>Intrepid</i>, each scholar must clear inspection across the ten school days preceding launch.</p>
+    <p>A scholar is <b>grounded</b> if they receive <span class="crit">2 or more</span> dean's referrals, <b>or</b> log <span class="crit">5 or more days</span> of missing/incomplete homework during the window.</p>
+    <p>Check a day's <b>HW</b> box when homework was turned in complete; leave it unchecked for missing or incomplete work. Enter dean's referrals for the day in the <b>D</b> field (usually 0).</p>
+  </section>
+
+  <div class="roster-bar">
+    <span class="label">Crew Roster</span>
+    <input type="search" id="search" placeholder="Search crew by name..." autocomplete="off" />
+    <button class="filter-btn" id="filterAll" aria-pressed="true">All</button>
+    <button class="filter-btn" id="filterGrounded" aria-pressed="false">Grounded only</button>
+    <span class="stat" id="stat"></span>
+  </div>
+
+  <div id="briefs"></div>
+
+  <div class="actions">
+    <button class="primary" id="saveBtn">Save Log</button>
+    <button id="printBtn">Print Brief</button>
+    <button id="resetBtn">Reset Log</button>
+    <span class="right">Logs are kept on this device only.</span>
+  </div>
+
+  <footer class="sig">
+    <span class="brass">&#10070;</span> &nbsp; Filed by the 6th Grade Bridge Crew &middot; Pier 86, NYC &nbsp; <span class="brass">&#10070;</span>
+  </footer>
+
+</div>
+
+<script>
+"use strict";
+
+var DEAN_LIMIT = 2;
+var MISSING_LIMIT = 5;
+
+var DATES = [
+  "2026-05-05","2026-05-06","2026-05-07","2026-05-08",
+  "2026-05-11","2026-05-12","2026-05-13","2026-05-14",
+  "2026-05-15","2026-05-18"
+];
+
+var SCHOLAR_NAMES = [
+  "Aicha K.","Alisha N. S. K.","Amin A.","Amira R.",
+  "Cadmir B.","Catherine D.","Christal B.","Dalvin F.",
+  "Dennis A.","Dianguina M.","Djenabou B.","Dzifa S.",
+  "Fanta C.","Fatoumatta F.","Humaira A.","Irenis A.",
+  "Isaac A.","Issatou D.","Izamarie R.","Jacob A.",
+  "Jacob G.","Jeremiah P.","Jeter E.","Julius E.",
+  "Juniel A. R.","Kaitlyn R.","Katalina G.","Ky'Lee-Rae S.",
+  "Leah D.","Lesley C.","Liam C.","Liam F.",
+  "Maame A.","Manuel T.","Mariyam T.","Mason E.",
+  "Maximus C.","Maxwell O.","Nyelle W.","Nyshira F.",
+  "Pelias A.","Sarah B.","Sophia A.","Sory K.",
+  "Stephanie A.","Yusra S.","Zaraie P.","Zoe C. V."
+];
+
+function slug(name) {
+  return name.toLowerCase()
+    .replace(/['']/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+function blankCells() {
+  var c = {};
+  DATES.forEach(function (d) { c[d] = { hw: true, d: 0 }; });
+  return c;
+}
+
+function defaultState() {
+  return {
+    dates: DATES.slice(),
+    scholars: SCHOLAR_NAMES.map(function (n) {
+      return { id: slug(n), name: n, cells: blankCells() };
+    })
+  };
+}
+
+var KEY = "fieldTripEligibility_2026_05_19_sanitized_v1";
+var state = load();
+
+function load() {
+  try {
+    var raw = localStorage.getItem(KEY);
+    if (!raw) return defaultState();
+    var parsed = JSON.parse(raw);
+    var fresh = defaultState();
+    fresh.scholars.forEach(function (s) {
+      var saved = (parsed.scholars || []).filter(function (x) { return x.id === s.id; })[0];
+      if (!saved || !saved.cells) return;
+      DATES.forEach(function (d) {
+        var cell = saved.cells[d];
+        if (!cell) return;
+        if (typeof cell.hw === "boolean") s.cells[d].hw = cell.hw;
+        else if (typeof cell.m === "number") s.cells[d].hw = cell.m === 0;
+        s.cells[d].d = Number(cell.d) || 0;
+      });
+    });
+    return fresh;
+  } catch (e) {
+    return defaultState();
+  }
+}
+
+function save() {
+  try {
+    localStorage.setItem(KEY, JSON.stringify(state));
+    flash(document.getElementById("saveBtn"), "Logged");
+  } catch (e) {
+    alert("Could not save on this device.");
+  }
+}
+
+function flash(btn, msg) {
+  var orig = btn.textContent;
+  btn.textContent = msg;
+  setTimeout(function () { btn.textContent = orig; }, 1200);
+}
+
+function fmt(iso) {
+  var p = iso.split("-");
+  var dt = new Date(+p[0], +p[1]-1, +p[2]);
+  var dow = ["SUN","MON","TUE","WED","THU","FRI","SAT"][dt.getDay()];
+  return { mday: (dt.getMonth()+1) + "/" + dt.getDate(), dow: dow };
+}
+
+function tallies(s) {
+  var miss = 0, dn = 0;
+  DATES.forEach(function (d) {
+    if (!s.cells[d].hw) miss++;
+    dn += Number(s.cells[d].d) || 0;
+  });
+  return { miss: miss, dn: dn };
+}
+
+function cleared(t) {
+  return t.dn < DEAN_LIMIT && t.miss < MISSING_LIMIT;
+}
+
+function makeBrief(s, index) {
+  var card = document.createElement("section");
+  card.className = "brief";
+  card.dataset.id = s.id;
+  card.dataset.name = s.name.toLowerCase();
+
+  var head = document.createElement("div");
+  head.className = "brief-head";
+
+  var id = document.createElement("div");
+  id.className = "brief-id";
+  var fileNo = "FILE " + String(index + 1).padStart(3, "0");
+  id.innerHTML =
+    '<div class="role">Crew Member</div>' +
+    '<div class="name">' + s.name + '</div>' +
+    '<div class="file">' + fileNo + ' &middot; Grade 6</div>';
+  head.appendChild(id);
+
+  var stamp = document.createElement("div");
+  stamp.className = "stamp";
+  stamp.dataset.role = "stamp";
+  head.appendChild(stamp);
+
+  card.appendChild(head);
+
+  var stripWrap = document.createElement("div");
+  stripWrap.className = "strip-wrap";
+  var strip = document.createElement("div");
+  strip.className = "strip";
+
+  DATES.forEach(function (d) {
+    var cell = s.cells[d];
+    var day = document.createElement("div");
+    day.className = "day";
+    if (!cell.hw) day.classList.add("miss");
+
+    var f = fmt(d);
+    day.innerHTML =
+      '<div class="date">' + f.mday + '</div>' +
+      '<div class="dow">' + f.dow + '</div>' +
+      '<hr/>' +
+      '<div class="lbl">HW</div>';
+
+    var cb = document.createElement("input");
+    cb.type = "checkbox";
+    cb.checked = !!cell.hw;
+    cb.title = "Homework complete on " + d;
+    cb.addEventListener("change", function () {
+      cell.hw = cb.checked;
+      day.classList.toggle("miss", !cb.checked);
+      paintTallies(s, card);
+      updateStat();
+      applyFilter();
+    });
+    day.appendChild(cb);
+
+    var dLbl = document.createElement("div");
+    dLbl.className = "lbl";
+    dLbl.textContent = "D";
+    day.appendChild(dLbl);
+
+    var num = document.createElement("input");
+    num.type = "number";
+    num.min = "0";
+    num.value = cell.d;
+    num.title = "Dean's referrals on " + d;
+    num.addEventListener("input", function () {
+      var n = Math.max(0, Math.floor(Number(num.value) || 0));
+      cell.d = n;
+      paintTallies(s, card);
+      updateStat();
+      applyFilter();
+    });
+    day.appendChild(num);
+
+    strip.appendChild(day);
+  });
+
+  stripWrap.appendChild(strip);
+  card.appendChild(stripWrap);
+
+  var tally = document.createElement("div");
+  tally.className = "tally";
+  tally.innerHTML =
+    '<div class="cell">' +
+      '<div class="lbl">Missing HW</div>' +
+      '<div class="val" data-role="miss">0</div>' +
+      '<div class="threshold">Limit: 4 days</div>' +
+    '</div>' +
+    '<div class="cell">' +
+      '<div class="lbl">Dean\'s Referrals</div>' +
+      '<div class="val" data-role="dn">0</div>' +
+      '<div class="threshold">Limit: 1</div>' +
+    '</div>' +
+    '<div class="cell">' +
+      '<div class="lbl">Verdict</div>' +
+      '<div class="val" data-role="verdict" style="font-size:15px;">&mdash;</div>' +
+      '<div class="reason" data-role="reason"></div>' +
+    '</div>';
+  card.appendChild(tally);
+
+  paintTallies(s, card);
+  return card;
+}
+
+function paintTallies(s, card) {
+  var t = tallies(s);
+  var ok = cleared(t);
+
+  var missEl = card.querySelector('[data-role="miss"]');
+  var dnEl = card.querySelector('[data-role="dn"]');
+  var verdictEl = card.querySelector('[data-role="verdict"]');
+  var reasonEl = card.querySelector('[data-role="reason"]');
+  var stamp = card.querySelector('[data-role="stamp"]');
+
+  missEl.textContent = t.miss;
+  missEl.classList.toggle("bad", t.miss >= MISSING_LIMIT);
+
+  dnEl.textContent = t.dn;
+  dnEl.classList.toggle("bad", t.dn >= DEAN_LIMIT);
+
+  card.dataset.cleared = ok ? "1" : "0";
+
+  if (ok) {
+    verdictEl.textContent = "Cleared to embark";
+    verdictEl.classList.remove("bad");
+    reasonEl.textContent = "On track for 19 May 2026.";
+    reasonEl.classList.add("ok");
+    stamp.className = "stamp go";
+    stamp.innerHTML = "Cleared<span class=\"sub\">to embark</span>";
+  } else {
+    verdictEl.textContent = "Grounded";
+    verdictEl.classList.add("bad");
+    var bits = [];
+    if (t.dn >= DEAN_LIMIT)   bits.push(t.dn + " dean's referral" + (t.dn === 1 ? "" : "s"));
+    if (t.miss >= MISSING_LIMIT) bits.push(t.miss + " missing day" + (t.miss === 1 ? "" : "s"));
+    reasonEl.innerHTML = "Reason: " + bits.join(' <span style="color:var(--muted)">&middot;</span> ');
+    reasonEl.classList.remove("ok");
+    stamp.className = "stamp no";
+    stamp.innerHTML = "Grounded<span class=\"sub\">not eligible</span>";
+  }
+}
+
+function renderAll() {
+  var host = document.getElementById("briefs");
+  host.innerHTML = "";
+  state.scholars.forEach(function (s, i) {
+    host.appendChild(makeBrief(s, i));
+  });
+  updateStat();
+  applyFilter();
+}
+
+function updateStat() {
+  var total = state.scholars.length;
+  var grounded = 0;
+  state.scholars.forEach(function (s) {
+    if (!cleared(tallies(s))) grounded++;
+  });
+  var statEl = document.getElementById("stat");
+  statEl.innerHTML =
+    '<b>' + (total - grounded) + '</b> cleared &middot; ' +
+    '<span class="no">' + grounded + '</span> grounded &middot; ' +
+    total + ' total';
+}
+
+var groundedOnly = false;
+function applyFilter() {
+  var q = document.getElementById("search").value.toLowerCase().trim();
+  var cards = document.querySelectorAll(".brief");
+  cards.forEach(function (c) {
+    var nameMatch = !q || c.dataset.name.indexOf(q) !== -1;
+    var statusMatch = !groundedOnly || c.dataset.cleared === "0";
+    c.classList.toggle("hidden", !(nameMatch && statusMatch));
+  });
+}
+
+document.getElementById("search").addEventListener("input", applyFilter);
+document.getElementById("filterAll").addEventListener("click", function () {
+  groundedOnly = false;
+  document.getElementById("filterAll").setAttribute("aria-pressed", "true");
+  document.getElementById("filterGrounded").setAttribute("aria-pressed", "false");
+  applyFilter();
+});
+document.getElementById("filterGrounded").addEventListener("click", function () {
+  groundedOnly = true;
+  document.getElementById("filterAll").setAttribute("aria-pressed", "false");
+  document.getElementById("filterGrounded").setAttribute("aria-pressed", "true");
+  applyFilter();
+});
+
+document.getElementById("saveBtn").addEventListener("click", save);
+document.getElementById("printBtn").addEventListener("click", function () { window.print(); });
+document.getElementById("resetBtn").addEventListener("click", function () {
+  if (!confirm("Reset all crew logs to complete homework and 0 referrals?")) return;
+  state = defaultState();
+  save();
+  renderAll();
+});
+
+renderAll();
+</script>
+</body>
+</html>
