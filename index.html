@@ -63,6 +63,72 @@
   .sheet::before { top: 14px; box-shadow: 0 4px 0 var(--rule); }
   .sheet::after  { bottom: 14px; box-shadow: 0 -4px 0 var(--rule); }
 
+  .admin-bar {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin: -4px 0 18px;
+    padding: 4px 0;
+    border-bottom: 1px dashed var(--rule);
+  }
+  .mode-pill {
+    font-family: "Stardos Stencil", "Oswald", sans-serif;
+    text-transform: uppercase;
+    letter-spacing: .16em;
+    font-size: 10px;
+    padding: 4px 9px;
+    border: 1px solid var(--muted);
+    color: var(--muted);
+    border-radius: 2px;
+    background: rgba(255, 250, 236, .6);
+  }
+  body.admin .mode-pill {
+    border-color: var(--brass);
+    color: var(--brass-deep);
+    background: #fcefb8;
+  }
+  .admin-btn {
+    font-family: "Stardos Stencil", "Oswald", sans-serif;
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    font-size: 11px;
+    padding: 5px 10px;
+    border: 1px solid var(--rule);
+    background: #fffdf3;
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .admin-btn:hover { background: #f5edcc; }
+  .passcode-form { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+  .passcode-form input[type="password"] {
+    font: inherit;
+    border: 1px solid var(--rule);
+    background: #fffdf3;
+    padding: 5px 8px;
+    font-size: 14px;
+    width: 120px;
+    letter-spacing: .35em;
+    text-align: center;
+  }
+  .passcode-form input[type="password"]:focus { outline: 1px solid var(--brass); }
+  .passcode-err {
+    color: var(--stamp-red);
+    font-family: "Stardos Stencil", "Oswald", sans-serif;
+    letter-spacing: .14em;
+    font-size: 10px;
+    text-transform: uppercase;
+  }
+  body:not(.admin) #saveBtn,
+  body:not(.admin) #resetBtn { display: none; }
+  body:not(.admin) .brief input[type="checkbox"][disabled],
+  body:not(.admin) .brief input[type="number"][disabled] {
+    cursor: not-allowed;
+    opacity: 1;
+  }
+  @media print { .admin-bar { display: none; } }
+
   .stencil {
     font-family: "Stardos Stencil", "Special Elite", "Oswald", "Arial Narrow", "Helvetica Neue", sans-serif;
     text-transform: uppercase;
@@ -598,6 +664,18 @@
 
 <div class="sheet">
 
+  <div class="admin-bar">
+    <span class="mode-pill" id="modePill" data-mode="view">View-only</span>
+    <button class="admin-btn" id="signInBtn" type="button">Admin Sign In</button>
+    <button class="admin-btn" id="signOutBtn" type="button" hidden>Sign Out</button>
+    <form class="passcode-form" id="passcodeForm" hidden autocomplete="off">
+      <input type="password" id="passcode" inputmode="numeric" autocomplete="off" placeholder="Passcode" required />
+      <button class="admin-btn" type="submit">Unlock</button>
+      <button class="admin-btn" type="button" id="cancelSignIn">Cancel</button>
+      <span class="passcode-err" id="passcodeErr" hidden>Incorrect</span>
+    </form>
+  </div>
+
   <header class="masthead">
     <div class="hull stencil">Hull CV-11 &middot; Later CVA-11 / CVS-11 &middot; "The Fighting I"</div>
     <h1 class="brief-title">SBC III Intrepid Field Trip</h1>
@@ -682,6 +760,11 @@
 
 var DEAN_LIMIT = 2;
 var MISSING_LIMIT = 5;
+
+var ADMIN_SALT = "intrepid-2026-admin";
+var ADMIN_HASH = "ae04bc14a1d88b63d771cc29f9370cc176674638f237e5036f0d221b2b108f3a";
+var ADMIN_STORAGE_KEY = "sbcIntrepidAdmin_v1";
+var adminMode = false;
 
 var DATES = [
   "2026-05-05","2026-05-06","2026-05-07","2026-05-08",
@@ -858,6 +941,7 @@ function makeBrief(s, index) {
     var cb = document.createElement("input");
     cb.type = "checkbox";
     cb.checked = !!cell.hw;
+    cb.disabled = !adminMode;
     cb.title = "Homework complete on " + d;
     cb.addEventListener("change", function () {
       cell.hw = cb.checked;
@@ -877,6 +961,7 @@ function makeBrief(s, index) {
     num.type = "number";
     num.min = "0";
     num.value = cell.d;
+    num.disabled = !adminMode;
     num.title = "Dean's referrals on " + d;
     num.addEventListener("input", function () {
       var n = Math.max(0, Math.floor(Number(num.value) || 0));
@@ -1075,7 +1160,86 @@ document.getElementById("resetBtn").addEventListener("click", function () {
   renderAll();
 });
 
+function sha256Hex(text) {
+  var enc = new TextEncoder().encode(text);
+  return crypto.subtle.digest("SHA-256", enc).then(function (buf) {
+    var bytes = new Uint8Array(buf);
+    var hex = "";
+    for (var i = 0; i < bytes.length; i++) hex += bytes[i].toString(16).padStart(2, "0");
+    return hex;
+  });
+}
+
+function tryUnlock(pass) {
+  return sha256Hex(ADMIN_SALT + ":" + pass).then(function (h) {
+    if (h !== ADMIN_HASH) return false;
+    try { localStorage.setItem(ADMIN_STORAGE_KEY, "1"); } catch (e) {}
+    adminMode = true;
+    applyAdminUI();
+    return true;
+  });
+}
+
+function signOut() {
+  try { localStorage.removeItem(ADMIN_STORAGE_KEY); } catch (e) {}
+  adminMode = false;
+  applyAdminUI();
+}
+
+function applyAdminUI() {
+  document.body.classList.toggle("admin", adminMode);
+  var pill = document.getElementById("modePill");
+  pill.textContent = adminMode ? "Admin" : "View-only";
+  pill.dataset.mode = adminMode ? "admin" : "view";
+
+  document.getElementById("signInBtn").hidden = adminMode;
+  document.getElementById("signOutBtn").hidden = !adminMode;
+  document.getElementById("passcodeForm").hidden = true;
+  document.getElementById("passcode").value = "";
+  document.getElementById("passcodeErr").hidden = true;
+
+  var inputs = document.querySelectorAll('.brief input[type="checkbox"], .brief input[type="number"]');
+  for (var i = 0; i < inputs.length; i++) inputs[i].disabled = !adminMode;
+
+  var rightEl = document.querySelector(".actions .right");
+  if (rightEl) rightEl.textContent = adminMode
+    ? "Logs are kept on this device only."
+    : "Read-only mode. Sign in as admin to edit.";
+}
+
+try { adminMode = localStorage.getItem(ADMIN_STORAGE_KEY) === "1"; } catch (e) { adminMode = false; }
+
 renderAll();
+applyAdminUI();
+
+document.getElementById("signInBtn").addEventListener("click", function () {
+  document.getElementById("passcodeForm").hidden = false;
+  document.getElementById("signInBtn").hidden = true;
+  document.getElementById("passcode").focus();
+});
+document.getElementById("cancelSignIn").addEventListener("click", function () {
+  document.getElementById("passcodeForm").hidden = true;
+  document.getElementById("passcode").value = "";
+  document.getElementById("passcodeErr").hidden = true;
+  if (!adminMode) document.getElementById("signInBtn").hidden = false;
+});
+document.getElementById("signOutBtn").addEventListener("click", signOut);
+document.getElementById("passcodeForm").addEventListener("submit", function (e) {
+  e.preventDefault();
+  var pass = document.getElementById("passcode").value;
+  tryUnlock(pass).then(function (ok) {
+    if (ok) return;
+    var errEl = document.getElementById("passcodeErr");
+    errEl.textContent = "Incorrect";
+    errEl.hidden = false;
+    document.getElementById("passcode").value = "";
+    document.getElementById("passcode").focus();
+  }).catch(function () {
+    var errEl = document.getElementById("passcodeErr");
+    errEl.textContent = "Sign-in unavailable in this browser (needs HTTPS)";
+    errEl.hidden = false;
+  });
+});
 </script>
 </body>
 </html>
