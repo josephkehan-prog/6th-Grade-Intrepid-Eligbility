@@ -148,6 +148,31 @@
     letter-spacing: .12em;
     font-size: 12px;
   }
+  .crit.no { background: var(--stamp-red); color: #fbeede; }
+
+  .block.grounded-roster {
+    border-color: var(--stamp-red);
+    box-shadow: inset 0 0 0 1px rgba(138, 28, 28, .18);
+  }
+  .block.grounded-roster .tag { color: var(--stamp-red); }
+  .grounded-list {
+    list-style: none;
+    margin: 12px 0 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 8px 18px;
+    font-size: 14px;
+  }
+  .grounded-list li {
+    color: var(--ink-soft);
+    padding: 4px 0;
+    border-top: 1px dotted rgba(25, 41, 58, .25);
+  }
+  .grounded-list li:first-child,
+  .grounded-list li:nth-child(-n+3) { border-top: 0; }
+  .grounded-list b { color: var(--ink); margin-right: 8px; }
+  .grounded-list .dates { display: inline-flex; gap: 4px; flex-wrap: wrap; vertical-align: middle; }
 
   .logistics {
     display: grid;
@@ -587,8 +612,24 @@
   <section class="block">
     <span class="tag stencil">Standing Orders</span>
     <p>To embark on the <i>Intrepid</i>, each scholar must clear inspection across the ten school days preceding launch.</p>
-    <p>A scholar is <b>grounded</b> if they receive <span class="crit">2 or more</span> dean's referrals, <b>or</b> log <span class="crit">5 or more days</span> of missing/incomplete homework during the window.</p>
+    <p>A scholar is <b>grounded</b> if they receive <span class="crit">2 or more</span> dean's referrals, <b>or</b> log <span class="crit">5 or more days</span> of missing/incomplete homework during the window. The Office may also ground a scholar at its discretion.</p>
     <p>Check a day's <b>HW</b> box when homework was turned in complete; leave it unchecked for missing or incomplete work. Enter dean's referrals for the day in the <b>D</b> field (usually 0).</p>
+  </section>
+
+  <section class="block grounded-roster">
+    <span class="tag stencil">Confirmed Grounded &mdash; Not Eligible</span>
+    <p>By order of the Office, the following scholars are <b>not eligible</b> to embark on 19 May 2026. Dean's referral dates are noted.</p>
+    <ul class="grounded-list">
+      <li><b>Aicha K.</b><span class="dates"><span class="crit no">5/11</span><span class="crit no">5/11</span></span></li>
+      <li><b>Amin A.</b><span class="dates"><span class="crit no">5/11</span></span></li>
+      <li><b>Christal B.</b><span class="dates"><span class="crit no">5/12</span></span></li>
+      <li><b>Jeter E.</b><span class="dates"><span class="crit no">5/11</span></span></li>
+      <li><b>Ky'Lee-Rae S.</b><span class="dates"><span class="crit no">5/12</span></span></li>
+      <li><b>Leah D.</b><span class="dates"><span class="crit no">5/11</span><span class="crit no">5/11</span></span></li>
+      <li><b>Lesley C.</b><span class="dates"><span class="crit no">5/11</span></span></li>
+      <li><b>Liam C.</b><span class="dates"><span class="crit no">5/12</span><span class="crit no">5/13</span></span></li>
+      <li><b>Maame A.</b><span class="dates"><span class="crit no">5/11</span></span></li>
+    </ul>
   </section>
 
   <div class="roster-bar">
@@ -654,16 +695,37 @@ function blankCells() {
   return c;
 }
 
+var REFERRAL_LOG = {
+  "amin-a":       ["2026-05-11"],
+  "liam-c":       ["2026-05-12", "2026-05-13"],
+  "leah-d":       ["2026-05-11", "2026-05-11"],
+  "maame-a":      ["2026-05-11"],
+  "christal-b":   ["2026-05-12"],
+  "lesley-c":     ["2026-05-11"],
+  "jeter-e":      ["2026-05-11"],
+  "aicha-k":      ["2026-05-11", "2026-05-11"],
+  "ky-lee-rae-s": ["2026-05-12"]
+};
+
+var MANUAL_INELIGIBLE = {};
+Object.keys(REFERRAL_LOG).forEach(function (id) { MANUAL_INELIGIBLE[id] = true; });
+
 function defaultState() {
   return {
     dates: DATES.slice(),
     scholars: SCHOLAR_NAMES.map(function (n) {
-      return { id: slug(n), name: n, cells: blankCells() };
+      var id = slug(n);
+      var cells = blankCells();
+      var refs = REFERRAL_LOG[id] || [];
+      refs.forEach(function (d) {
+        if (cells[d]) cells[d].d = (Number(cells[d].d) || 0) + 1;
+      });
+      return { id: id, name: n, cells: cells };
     })
   };
 }
 
-var KEY = "fieldTripEligibility_2026_05_19_sanitized_v1";
+var KEY = "fieldTripEligibility_2026_05_19_sanitized_v2";
 var state = load();
 
 function load() {
@@ -722,6 +784,11 @@ function tallies(s) {
 
 function cleared(t) {
   return t.dn < DEAN_LIMIT && t.miss < MISSING_LIMIT;
+}
+
+function isCleared(s) {
+  if (MANUAL_INELIGIBLE[s.id]) return false;
+  return cleared(tallies(s));
 }
 
 function makeBrief(s, index) {
@@ -831,7 +898,7 @@ function makeBrief(s, index) {
 
 function paintTallies(s, card) {
   var t = tallies(s);
-  var ok = cleared(t);
+  var ok = isCleared(s);
 
   var missEl = card.querySelector('[data-role="miss"]');
   var dnEl = card.querySelector('[data-role="dn"]');
@@ -858,8 +925,10 @@ function paintTallies(s, card) {
     verdictEl.textContent = "Grounded";
     verdictEl.classList.add("bad");
     var bits = [];
+    if (MANUAL_INELIGIBLE[s.id]) bits.push("office decision");
     if (t.dn >= DEAN_LIMIT)   bits.push(t.dn + " dean's referral" + (t.dn === 1 ? "" : "s"));
     if (t.miss >= MISSING_LIMIT) bits.push(t.miss + " missing day" + (t.miss === 1 ? "" : "s"));
+    if (!bits.length && t.dn > 0) bits.push(t.dn + " dean's referral" + (t.dn === 1 ? "" : "s"));
     reasonEl.innerHTML = "Reason: " + bits.join(' <span style="color:var(--muted)">&middot;</span> ');
     reasonEl.classList.remove("ok");
     stamp.className = "stamp no";
@@ -881,7 +950,7 @@ function updateStat() {
   var total = state.scholars.length;
   var grounded = 0;
   state.scholars.forEach(function (s) {
-    if (!cleared(tallies(s))) grounded++;
+    if (!isCleared(s)) grounded++;
   });
   var statEl = document.getElementById("stat");
   statEl.innerHTML =
@@ -918,7 +987,7 @@ document.getElementById("filterGrounded").addEventListener("click", function () 
 document.getElementById("saveBtn").addEventListener("click", save);
 document.getElementById("printBtn").addEventListener("click", function () { window.print(); });
 document.getElementById("resetBtn").addEventListener("click", function () {
-  if (!confirm("Reset all crew logs to complete homework and 0 referrals?")) return;
+  if (!confirm("Reset all crew logs to the on-record state (referral log restored)?")) return;
   state = defaultState();
   save();
   renderAll();
