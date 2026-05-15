@@ -149,12 +149,18 @@
     font-size: 12px;
   }
   .crit.no { background: var(--stamp-red); color: #fbeede; }
+  .crit.warn { background: var(--brass); color: #fff7d8; }
 
   .block.grounded-roster {
     border-color: var(--stamp-red);
     box-shadow: inset 0 0 0 1px rgba(138, 28, 28, .18);
   }
   .block.grounded-roster .tag { color: var(--stamp-red); }
+  .block.warn-roster {
+    border-color: var(--brass);
+    box-shadow: inset 0 0 0 1px rgba(164, 123, 42, .28);
+  }
+  .block.warn-roster .tag { color: var(--brass-deep); }
   .grounded-list {
     list-style: none;
     margin: 12px 0 0;
@@ -370,6 +376,17 @@
   .brief[data-cleared="0"] .day input[type="number"] {
     border-color: #9a9da3; color: #4f535c; background: #f1ede2;
   }
+
+  .brief[data-warn="1"] {
+    border-color: var(--brass);
+    box-shadow: 0 0 0 2px var(--brass) inset, 0 1px 0 rgba(13, 33, 56, .1);
+  }
+  .brief[data-warn="1"]::before { border-color: var(--brass); }
+  .brief[data-warn="1"] .brief-head {
+    background: linear-gradient(180deg, #fcefb8 0%, #fffaec 100%);
+    border-bottom-color: var(--brass);
+  }
+  .brief[data-warn="1"] .brief-id .role { color: var(--brass-deep); }
   .brief[data-cleared="0"] .tally {
     background: #d7d2c3;
     border-top-color: #7e8088;
@@ -618,17 +635,24 @@
 
   <section class="block grounded-roster">
     <span class="tag stencil">Confirmed Grounded &mdash; Not Eligible</span>
-    <p>By order of the Office, the following scholars are <b>not eligible</b> to embark on 19 May 2026. Dean's referral dates are noted.</p>
+    <p>The following scholars are <b>not eligible</b> to embark on 19 May 2026 (two or more dean's referrals during the window). Referral dates are noted.</p>
     <ul class="grounded-list">
       <li><b>Aicha K.</b><span class="dates"><span class="crit no">5/11</span><span class="crit no">5/11</span></span></li>
-      <li><b>Amin A.</b><span class="dates"><span class="crit no">5/11</span></span></li>
-      <li><b>Christal B.</b><span class="dates"><span class="crit no">5/12</span></span></li>
-      <li><b>Jeter E.</b><span class="dates"><span class="crit no">5/11</span></span></li>
-      <li><b>Ky'Lee-Rae S.</b><span class="dates"><span class="crit no">5/12</span></span></li>
       <li><b>Leah D.</b><span class="dates"><span class="crit no">5/11</span><span class="crit no">5/11</span></span></li>
-      <li><b>Lesley C.</b><span class="dates"><span class="crit no">5/11</span></span></li>
       <li><b>Liam C.</b><span class="dates"><span class="crit no">5/12</span><span class="crit no">5/13</span></span></li>
-      <li><b>Maame A.</b><span class="dates"><span class="crit no">5/11</span></span></li>
+    </ul>
+  </section>
+
+  <section class="block warn-roster">
+    <span class="tag stencil">Close Watch &mdash; One Strike from Grounded</span>
+    <p>The following scholars are <b>still cleared</b> to embark but have logged <b>one dean's referral</b>. One more before launch grounds them.</p>
+    <ul class="grounded-list">
+      <li><b>Amin A.</b><span class="dates"><span class="crit warn">5/11</span></span></li>
+      <li><b>Christal B.</b><span class="dates"><span class="crit warn">5/12</span></span></li>
+      <li><b>Jeter E.</b><span class="dates"><span class="crit warn">5/11</span></span></li>
+      <li><b>Ky'Lee-Rae S.</b><span class="dates"><span class="crit warn">5/12</span></span></li>
+      <li><b>Lesley C.</b><span class="dates"><span class="crit warn">5/11</span></span></li>
+      <li><b>Maame A.</b><span class="dates"><span class="crit warn">5/11</span></span></li>
     </ul>
   </section>
 
@@ -708,7 +732,6 @@ var REFERRAL_LOG = {
 };
 
 var MANUAL_INELIGIBLE = {};
-Object.keys(REFERRAL_LOG).forEach(function (id) { MANUAL_INELIGIBLE[id] = true; });
 
 function defaultState() {
   return {
@@ -725,7 +748,7 @@ function defaultState() {
   };
 }
 
-var KEY = "fieldTripEligibility_2026_05_19_sanitized_v2";
+var KEY = "fieldTripEligibility_2026_05_19_sanitized_v3";
 var state = load();
 
 function load() {
@@ -913,14 +936,18 @@ function paintTallies(s, card) {
   dnEl.classList.toggle("bad", t.dn >= DEAN_LIMIT);
 
   card.dataset.cleared = ok ? "1" : "0";
+  card.dataset.warn = (ok && t.dn >= 1) ? "1" : "";
 
   if (ok) {
-    verdictEl.textContent = "Cleared to embark";
+    var warn = card.dataset.warn === "1";
+    verdictEl.textContent = warn ? "Cleared — Close Watch" : "Cleared to embark";
     verdictEl.classList.remove("bad");
-    reasonEl.textContent = "On track for 19 May 2026.";
+    reasonEl.textContent = warn
+      ? "One more dean's referral grounds the scholar (" + t.dn + " of " + DEAN_LIMIT + " logged)."
+      : "On track for 19 May 2026.";
     reasonEl.classList.add("ok");
     stamp.className = "stamp go";
-    stamp.innerHTML = "Cleared<span class=\"sub\">to embark</span>";
+    stamp.innerHTML = "Cleared<span class=\"sub\">" + (warn ? "close watch" : "to embark") + "</span>";
   } else {
     verdictEl.textContent = "Grounded";
     verdictEl.classList.add("bad");
