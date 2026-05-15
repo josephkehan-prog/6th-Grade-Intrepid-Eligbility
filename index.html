@@ -179,6 +179,12 @@
   .grounded-list li:nth-child(-n+3) { border-top: 0; }
   .grounded-list b { color: var(--ink); margin-right: 8px; }
   .grounded-list .dates { display: inline-flex; gap: 4px; flex-wrap: wrap; vertical-align: middle; }
+  .grounded-list li.roster-empty {
+    color: var(--muted);
+    font-style: italic;
+    border-top: 0;
+    grid-column: 1 / -1;
+  }
 
   .logistics {
     display: grid;
@@ -633,27 +639,16 @@
     <p>Check a day's <b>HW</b> box when homework was turned in complete; leave it unchecked for missing or incomplete work. Enter dean's referrals for the day in the <b>D</b> field (usually 0).</p>
   </section>
 
-  <section class="block grounded-roster">
+  <section class="block grounded-roster" id="groundedSection">
     <span class="tag stencil">Confirmed Grounded &mdash; Not Eligible</span>
-    <p>The following scholars are <b>not eligible</b> to embark on 19 May 2026 (two or more dean's referrals during the window). Referral dates are noted.</p>
-    <ul class="grounded-list">
-      <li><b>Aicha K.</b><span class="dates"><span class="crit no">5/11</span><span class="crit no">5/11</span></span></li>
-      <li><b>Leah D.</b><span class="dates"><span class="crit no">5/11</span><span class="crit no">5/11</span></span></li>
-      <li><b>Liam C.</b><span class="dates"><span class="crit no">5/12</span><span class="crit no">5/13</span></span></li>
-    </ul>
+    <p>The following scholars are <b>not eligible</b> to embark on 19 May 2026 (two or more dean's referrals, <i>or</i> five or more missing-homework days). Updates live as the log changes.</p>
+    <ul class="grounded-list" id="groundedList"></ul>
   </section>
 
-  <section class="block warn-roster">
+  <section class="block warn-roster" id="warnSection">
     <span class="tag stencil">Close Watch &mdash; One Strike from Grounded</span>
-    <p>The following scholars are <b>still cleared</b> to embark but have logged <b>one dean's referral</b>. One more before launch grounds them.</p>
-    <ul class="grounded-list">
-      <li><b>Amin A.</b><span class="dates"><span class="crit warn">5/11</span></span></li>
-      <li><b>Christal B.</b><span class="dates"><span class="crit warn">5/12</span></span></li>
-      <li><b>Jeter E.</b><span class="dates"><span class="crit warn">5/11</span></span></li>
-      <li><b>Ky'Lee-Rae S.</b><span class="dates"><span class="crit warn">5/12</span></span></li>
-      <li><b>Lesley C.</b><span class="dates"><span class="crit warn">5/11</span></span></li>
-      <li><b>Maame A.</b><span class="dates"><span class="crit warn">5/11</span></span></li>
-    </ul>
+    <p>The following scholars are <b>still cleared</b> but have logged <b>one dean's referral</b>. One more before launch grounds them. Updates live as the log changes.</p>
+    <ul class="grounded-list" id="warnList"></ul>
   </section>
 
   <div class="roster-bar">
@@ -984,6 +979,57 @@ function updateStat() {
     '<b>' + (total - grounded) + '</b> cleared &middot; ' +
     '<span class="no">' + grounded + '</span> grounded &middot; ' +
     total + ' total';
+  renderRosters();
+}
+
+function renderRosters() {
+  var groundedList = document.getElementById("groundedList");
+  var warnList = document.getElementById("warnList");
+  if (!groundedList || !warnList) return;
+
+  var grounded = [];
+  var watch = [];
+
+  state.scholars.forEach(function (s) {
+    var t = tallies(s);
+    if (!isCleared(s)) {
+      grounded.push({ s: s, t: t });
+    } else if (t.dn >= 1) {
+      watch.push({ s: s, t: t });
+    }
+  });
+
+  grounded.sort(byName);
+  watch.sort(byName);
+
+  groundedList.innerHTML = grounded.length
+    ? grounded.map(function (e) { return rosterRow(e.s, e.t, "no"); }).join("")
+    : '<li class="roster-empty">No scholars currently grounded.</li>';
+  warnList.innerHTML = watch.length
+    ? watch.map(function (e) { return rosterRow(e.s, e.t, "warn"); }).join("")
+    : '<li class="roster-empty">No scholars on close watch.</li>';
+}
+
+function byName(a, b) {
+  return a.s.name.localeCompare(b.s.name);
+}
+
+function rosterRow(s, t, chipClass) {
+  var chips = [];
+  DATES.forEach(function (d) {
+    var cnt = Number(s.cells[d].d) || 0;
+    if (cnt > 0) {
+      var lbl = fmt(d).mday;
+      for (var i = 0; i < cnt; i++) {
+        chips.push('<span class="crit ' + chipClass + '">' + lbl + '</span>');
+      }
+    }
+  });
+  if (t.miss >= MISSING_LIMIT) {
+    chips.push('<span class="crit ' + chipClass + '">' + t.miss + ' missing HW</span>');
+  }
+  var dates = chips.length ? '<span class="dates">' + chips.join("") + '</span>' : '';
+  return '<li><b>' + s.name + '</b>' + dates + '</li>';
 }
 
 var groundedOnly = false;
